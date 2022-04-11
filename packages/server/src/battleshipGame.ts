@@ -35,8 +35,19 @@ export class BattleshipGame {
     if (this.state !== GameState.READY) throw new Error("Game not ready.")
     if (this.boards[playerId]) throw new Error("Board already created.")
     const valid = PlayingBoard.validate(board)
-    console.log(board)
-    console.log(this.boards)
+
+    if (valid) {
+      this.boards[playerId] = new PlayingBoard({}, board)
+      this.findPlayerById(playerId)
+          .socket
+          .send("valid board submitted.")
+    } else {
+      this.findPlayerById(playerId)
+          .socket
+          .send("invalid board submitted.")
+    }
+
+    console.log(this)
   }
 
   public addPlayerToGame(player: Player) {
@@ -56,5 +67,9 @@ export class BattleshipGame {
     for (const player of this.players) players.push(player.name)
 
     return players
+  }
+
+  private findPlayerById(playerId: string) {
+    return this.players.filter((player) => player.id === playerId)[0]
   }
 }
